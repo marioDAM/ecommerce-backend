@@ -56,7 +56,7 @@ public class CartController implements CartApi {
             return ResponseEntity.ok(addedProducts);
         } catch (Exception e) {
             log.error("Error al añadir productos al carrito con ID {}: {}", id, e.getMessage(), e);
-            return ResponseEntity.status(500).build(); // Error del servidor
+            return ResponseEntity.status(500).build();
         }
     }
 
