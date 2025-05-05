@@ -43,5 +43,5 @@ public interface CartApi {
             @ApiResponse(responseCode = "400", description = "Solicitud inválida")
     })
     @DeleteMapping("/cart/{id}")
-    ResponseEntity<Void> deleteCart(@PathVariable String id);
+    ResponseEntity<String> deleteCart(@PathVariable String id);
 }

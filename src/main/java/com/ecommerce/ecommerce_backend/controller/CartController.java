@@ -61,13 +61,13 @@ public class CartController implements CartApi {
     }
 
     @Override
-    public ResponseEntity<Void> deleteCart(String id) {
+    public ResponseEntity<String> deleteCart(String id) {
         try {
             cartService.deleteCart(id);
-            return ResponseEntity.noContent().build();
+            return ResponseEntity.ok("Carrito eliminado correctamente");
         } catch (Exception e) {
             log.error("Error al eliminar el carrito con ID {}: {}", id, e.getMessage(), e);
-            return ResponseEntity.status(500).build();
+            return ResponseEntity.status(500).body("Error al eliminar el carrito.");
         }
     }
 }

@@ -18,9 +18,19 @@ import java.util.concurrent.ConcurrentHashMap;
 @Service
 @Slf4j
 public class CartServiceImpl implements CartService {
-    private final Map<String, Cart> cartStorage = new ConcurrentHashMap<>();
+    public final Map<String, Cart> cartStorage;
 
-    public final Map<String, LocalDateTime> cartActivity = new ConcurrentHashMap<>();
+    public final Map<String, LocalDateTime> cartActivity;
+
+    public CartServiceImpl() {
+        this.cartStorage = new ConcurrentHashMap<>();
+        this.cartActivity = new ConcurrentHashMap<>();
+    }
+
+    public CartServiceImpl(Map<String, Cart> cartStorage, Map<String, LocalDateTime> cartActivity) {
+        this.cartStorage = cartStorage;
+        this.cartActivity = cartActivity;
+    }
 
     @Override
     public String createCart() {
@@ -60,9 +70,10 @@ public class CartServiceImpl implements CartService {
     public List<Product> addProductsToCart(String id, List<Product> products) {
         try {
             Cart cart = cartStorage.get(id);
+
             if (cart == null) {
                 log.warn("El carrito con ID {} no existe. No se pueden añadir productos.", id);
-                return null;
+                throw new RuntimeException("El carrito no existe. No se pueden añadir productos");
             }
 
             if (products == null || products.isEmpty()) {
@@ -81,22 +92,26 @@ public class CartServiceImpl implements CartService {
             return products;
         } catch (Exception e) {
             log.error("Error inesperado al añadir productos al carrito con ID {}: {}", id, e.getMessage(), e);
-            return null;
+            throw new RuntimeException("Error inesperado al añadir productos al carrito", e);
         }
     }
 
     @Override
-    public void deleteCart(String id) {
+    public String deleteCart(String id) {
         try {
             if (!cartStorage.containsKey(id)) {
                 log.warn("El carrito con ID {} no existe. No se puede eliminar.", id);
-                return;
+                throw new RuntimeException("El carrito con ID " + id + " no existe.");
             }
+
             cartStorage.remove(id);
             cartActivity.remove(id);
             log.info("El carrito con ID {} ha sido eliminado correctamente.", id);
+
+            return "El carrito con ID " + id + " ha sido eliminado correctamente.";
         } catch (Exception e) {
             log.error("Error al eliminar el carrito con ID {}: {}", id, e.getMessage(), e);
+            throw new RuntimeException("Se produjo un error crítico al eliminar el carrito con ID " + id, e);
         }
     }
 
