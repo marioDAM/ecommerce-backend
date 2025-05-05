@@ -12,7 +12,7 @@ public interface CartService {
 
     List<Product> addProductsToCart(String id, List<Product> products);
 
-    void deleteCart(String id);
+    String deleteCart(String id);
 
     void deleteInactiveCarts();
 }

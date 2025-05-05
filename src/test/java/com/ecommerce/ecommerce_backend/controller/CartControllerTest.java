@@ -8,6 +8,7 @@ import org.junit.jupiter.api.Test;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 
 import java.util.List;
@@ -126,11 +127,12 @@ public class CartControllerTest {
     @Test
     void deleteCart_shouldReturnNoContent() {
         String cartId = "12345";
-        doNothing().when(cartService).deleteCart(cartId);
+        when(cartService.deleteCart(cartId)).thenReturn("Carrito eliminado correctamente");
 
-        ResponseEntity<Void> response = cartController.deleteCart(cartId);
+        ResponseEntity<String> response = cartController.deleteCart(cartId);
 
-        assertEquals(NO_CONTENT, response.getStatusCode());
+        assertEquals(HttpStatus.OK, response.getStatusCode());
+        assertEquals("Carrito eliminado correctamente", response.getBody());
         verify(cartService, times(1)).deleteCart(cartId);
     }
 
@@ -139,7 +141,7 @@ public class CartControllerTest {
         String cartId = "test-cart-id";
         doThrow(new RuntimeException("Simulated exception")).when(cartService).deleteCart(cartId);
 
-        ResponseEntity<Void> response = cartController.deleteCart(cartId);
+        ResponseEntity<String> response = cartController.deleteCart(cartId);
 
         assertEquals(500, response.getStatusCode().value());
         verify(cartService, times(1)).deleteCart(cartId);
