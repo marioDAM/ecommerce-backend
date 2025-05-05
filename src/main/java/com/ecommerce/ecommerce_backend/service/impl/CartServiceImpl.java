@@ -24,16 +24,14 @@ public class CartServiceImpl implements CartService {
 
     @Override
     public String createCart() {
-        String cartId;
         try {
-            cartId = UUID.randomUUID().toString();
+            String cartId = UUID.randomUUID().toString();
 
             cartStorage.put(cartId, new Cart(cartId));
 
             cartActivity.put(cartId, LocalDateTime.now());
 
             log.info("Carrito creado correctamente con ID: {}", cartId);
-
             return "Carrito creado correctamente, con ID: " + cartId;
 
         } catch (Exception e) {

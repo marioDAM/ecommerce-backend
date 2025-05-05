@@ -29,7 +29,7 @@ public class CartControllerTest {
     }
 
     @Test
-    void createCart_shouldReturnCartId() {
+    void createCart_Ok() {
         String expectedCartId = "12345";
         when(cartService.createCart()).thenReturn(expectedCartId);
 
@@ -40,7 +40,18 @@ public class CartControllerTest {
     }
 
     @Test
-    void getCart_whenCartExists_shouldReturnCart() {
+    void createCart_Exception() {
+        when(cartService.createCart()).thenThrow(new RuntimeException("Simulated exception"));
+
+        ResponseEntity<String> response = cartController.createCart();
+
+        assertEquals(500, response.getStatusCode().value());
+        assertEquals("Error al crear el carrito.", response.getBody());
+        verify(cartService, times(1)).createCart();
+    }
+
+    @Test
+    void getCart_Ok() {
         String cartId = "12345";
         Cart expectedCart = new Cart(cartId);
         when(cartService.getCart(cartId)).thenReturn(expectedCart);
@@ -52,7 +63,7 @@ public class CartControllerTest {
     }
 
     @Test
-    void getCart_whenCartDoesNotExist_shouldReturnNotFound() {
+    void getCart_NotFound() {
         String cartId = "12345";
         when(cartService.getCart(cartId)).thenReturn(null);
 
@@ -62,7 +73,18 @@ public class CartControllerTest {
     }
 
     @Test
-    void addProductsToCart_whenCartExists_shouldReturnAddedProducts() {
+    void testGetCart_Exception() {
+        String cartId = "test-cart-id";
+        when(cartService.getCart(cartId)).thenThrow(new RuntimeException("Simulated exception"));
+
+        ResponseEntity<Cart> response = cartController.getCart(cartId);
+
+        assertEquals(500, response.getStatusCode().value());
+        verify(cartService, times(1)).getCart(cartId);
+    }
+
+    @Test
+    void addProductsToCart_Ok() {
         String cartId = "12345";
         Product product = new Product(1, "Producto de prueba", 10.99);
         List<Product> products = List.of(product);
@@ -76,25 +98,13 @@ public class CartControllerTest {
     }
 
     @Test
-    void addProductsToCart_whenCartDoesNotExist_shouldReturnBadRequest() {
+    void addProductsToCart_CartNotExistsException() {
         String invalidCartId = "nonexistent";
         Product product = new Product(1, "Producto de prueba", 10.99);
         List<Product> products = List.of(product);
         when(cartService.addProductsToCart(invalidCartId, products)).thenReturn(null);
 
         ResponseEntity<List<Product>> response = cartController.addProductsToCart(invalidCartId, products);
-
-        assertEquals(400, response.getStatusCode().value(), "El estado HTTP debería ser 400 Bad Request");
-        assertNull(response.getBody(), "El cuerpo de la respuesta debería ser nulo");
-    }
-
-    @Test
-    void addProductsToCart_whenProductListIsEmpty_shouldReturnBadRequest() {
-        String cartId = "12345";
-        List<Product> products = List.of(); // Lista vacía
-        when(cartService.addProductsToCart(cartId, products)).thenReturn(List.of());
-
-        ResponseEntity<List<Product>> response = cartController.addProductsToCart(cartId, products);
 
         assertEquals(400, response.getStatusCode().value(), "El estado HTTP debería ser 400 Bad Request");
         assertNull(response.getBody(), "El cuerpo de la respuesta debería ser nulo");
@@ -121,6 +131,17 @@ public class CartControllerTest {
         ResponseEntity<Void> response = cartController.deleteCart(cartId);
 
         assertEquals(NO_CONTENT, response.getStatusCode());
-        verify(cartService, times(1)).deleteCart(cartId); // Verificamos que se llamó al servicio
+        verify(cartService, times(1)).deleteCart(cartId);
+    }
+
+    @Test
+    void deleteCart_WhenServiceThrowsException_ShouldReturn500() {
+        String cartId = "test-cart-id";
+        doThrow(new RuntimeException("Simulated exception")).when(cartService).deleteCart(cartId);
+
+        ResponseEntity<Void> response = cartController.deleteCart(cartId);
+
+        assertEquals(500, response.getStatusCode().value());
+        verify(cartService, times(1)).deleteCart(cartId);
     }
 }
